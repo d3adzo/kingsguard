@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <winternl.h>
-// #include "MinHook.h"
+#include "MinHook.h"
 
 #define STATUS_SUCCESS  ((NTSTATUS)0x00000000L)
 

