@@ -1,8 +1,16 @@
 CC=x86_64-w64-mingw32-g++
+OUTDIR=bin
+SYM=-s
+FLAGS=-static -shared -Iminhook -Lminhook -lminhook 
 
-all:
-	$(CC) main.cpp -o main.dll -static -shared -Iminhook -Lminhook -lminhook -s
+all: clean knight guard
 
+guard:
+	$(CC) guard.cpp -o $(OUTDIR)/kingsguard.dll $(FLAGS) $(SYM)
+
+knight:
+	$(CC) knight.cpp -o $(OUTDIR)/knight.exe $(SYM)
 
 clean:
-	rm main.dll
+	mkdir -p $(OUTDIR)
+	rm -f $(OUTDIR)/*

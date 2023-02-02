@@ -2,6 +2,7 @@
 #include <winternl.h>
 #include "MinHook.h"
 
+const wchar_t* targetNames[] = {L"calc.exe", L"explorer.exe", L"lsass.exe"};
 #define STATUS_SUCCESS  ((NTSTATUS)0x00000000L)
 
 typedef struct _MY_SYSTEM_PROCESS_INFORMATION

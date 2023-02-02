@@ -1,10 +1,4 @@
-#include "main.h"
-#include <stdio.h>
-#include <iostream>
-
-/* const wchar_t* targetNames[] = {L"taskmgr.exe", L"procexp.exe", L"procexp64.exe"}; */
-const wchar_t* targetNames[] = {L"calc.exe", L"explorer.exe", L"lsass.exe"};
-// int targetsPIDs[] = {0, 0, 0};
+#include "guard.h"
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
