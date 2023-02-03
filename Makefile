@@ -1,7 +1,7 @@
 CC=x86_64-w64-mingw32-g++
 OUTDIR=bin
 SYM=-s
-FLAGS=-static -shared -Iminhook -Lminhook -lminhook 
+FLAGS=-static -shared -Iminhook -Lminhook -lminhook
 
 all: clean knight guard
 

