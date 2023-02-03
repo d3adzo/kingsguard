@@ -1,4 +1,4 @@
-#include "guard.h"
+#include "kingsguard.h"
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
