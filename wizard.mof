@@ -11,7 +11,7 @@ instance of __EventFilter as $f1
     EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"Taskmgr%\" ";
+            "And Targetinstance.Name LIKE \"Taskmgr.exe\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
@@ -32,7 +32,7 @@ instance of __EventFilter as $f2
     EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"procexp%\" ";
+            "And Targetinstance.Name LIKE \"procexp.exe\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
@@ -53,7 +53,7 @@ instance of __EventFilter as $f3
     EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"procexp64%\" ";
+            "And Targetinstance.Name LIKE \"procexp64.exe\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
