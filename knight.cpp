@@ -50,19 +50,8 @@ int main(int argc, char** argv)
 
         WriteProcessMemory(hProcess, loc, dllPath, strlen(dllPath) + 1, 0);
 
-        HANDLE hThread = CreateRemoteThread(hProcess, 0, 0, (LPTHREAD_START_ROUTINE)addr, loc, 0, 0);
-
-        if (hThread)
-        {
-            CloseHandle(hThread);
-        }
+        CreateRemoteThread(hProcess, 0, 0, (LPTHREAD_START_ROUTINE)addr, loc, 0, 0);
     }
-
-    if (hProcess)
-    {
-        CloseHandle(hProcess);
-    }
-
     
     return 0;
 }
