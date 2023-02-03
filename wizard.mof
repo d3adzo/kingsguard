@@ -8,10 +8,10 @@ instance of CommandLineEventConsumer as $c1
 instance of __EventFilter as $f1
 {
     Name = "Kingsguard-1";
-    EventNamespace = "root\\subscription";
+    EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"Taskmgr\" ";
+            "And Targetinstance.Name LIKE \"Taskmgr%\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
@@ -29,10 +29,10 @@ instance of CommandLineEventConsumer as $c2
 instance of __EventFilter as $f2
 {
     Name = "Kingsguard-2";
-    EventNamespace = "root\\subscription";
+    EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"procexp\" ";
+            "And Targetinstance.Name LIKE \"procexp%\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
@@ -50,10 +50,10 @@ instance of CommandLineEventConsumer as $c3
 instance of __EventFilter as $f3
 {
     Name = "Kingsguard-3";
-    EventNamespace = "root\\subscription";
+    EventNamespace = "root\\cimv2";
     Query ="SELECT * FROM __InstanceCreationEvent Within 3 "
             "Where TargetInstance Isa \"Win32_Process\" "
-            "And Targetinstance.Name LIKE \"procexp64\" ";
+            "And Targetinstance.Name LIKE \"procexp64%\" ";
     QueryLanguage = "WQL";
 };
 instance of __FilterToConsumerBinding
