@@ -6,13 +6,13 @@ DFLAGS=-shared -Iminhook -Lminhook -lminhook
 all: clean knight archer kingsguard
 
 kingsguard:
-	$(CC) kingsguard.cpp -o $(OUTDIR)/kingsguard.dll $(FLAGS) $(SYM)
+	$(CC) kingsguard.cpp -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
 
 knight:
-	$(CC) knight.cpp -o $(OUTDIR)/knight.exe $(SYM)
+	$(CC) knight.cpp -o $(OUTDIR)/knight.exe $(CFLAGS)
 
 archer:
-	$(CC) archer.cpp -o $(OUDIR)/archer.exe $(SYM)
+	$(CC) archer.cpp -o $(OUTDIR)/archer.exe $(CFLAGS)
 
 clean:
 	mkdir -p $(OUTDIR)
