@@ -27,7 +27,7 @@ void modifyPEB()
         getchar(); // for testing
 }
 
-const char* backupArray[] = {
+const char* backupArray[] = { // TODO use std::pair
     "backuppath",
     "newpath",
     "backuppath",
@@ -73,6 +73,17 @@ int iterateBackups()
 
 int main()
 {
+	HANDLE hMutex; // use mutex to make sure process isn't already running
+ 	hMutex = CreateMutexA(NULL, FALSE, "KingsguardMutex");
+	if (GetLastError() == ERROR_ALREADY_EXISTS) 
+	{
+		if (hMutex && GetLastError() == ERROR_ALREADY_EXISTS) 
+		{
+			CloseHandle(hMutex);
+			return 0;
+		}
+	}
+	
     modifyPEB();
 
     for(;;)
