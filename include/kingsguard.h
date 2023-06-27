@@ -106,8 +106,8 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE, ULONG, NT_KEY_VALUE_INFORMATIO
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE, PUNICODE_STRING, NT_KEY_VALUE_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG);
 
-static pNtQuerySystemInformation OriginalNtQuerySystemInformation = nullptr;
-static pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
-static pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
-static pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
-static pNtOpenFile OriginalNtOpenFile = nullptr;
+extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
+extern pNtTerminateProcess OriginalNtTerminateProcess;
+extern pNtEnumerateValueKey OriginalNtEnumerateValueKey;
+extern pNtQueryValueKey OriginalNtQueryValueKey;
+extern pNtOpenFile OriginalNtOpenFile;

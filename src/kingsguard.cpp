@@ -1,5 +1,11 @@
 #include "kingsguard.h"
 
+pNtQuerySystemInformation OriginalNtQuerySystemInformation = nullptr;
+pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
+pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
+pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
+pNtOpenFile OriginalNtOpenFile = nullptr;
+
 bool InstallHook()
 {
     OutputDebugStringA("installing hooks");
