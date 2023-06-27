@@ -1,10 +1,17 @@
 #include "kingsguard.h"
 
-pNtQuerySystemInformation OriginalNtQuerySystemInformation = nullptr;
-pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
-pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
-pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
-pNtOpenFile OriginalNtOpenFile = nullptr;
+NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions)
+{
+    if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 1)
+    {
+        std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
+        // std::transform(w_name.begin(), w_name.end(), ::tolower);
+        if (w_name.find(L"Windows\\ShellComponents") != std::wstring::npos) // no delete dir
+            return STATUS_ACCESS_DENIED;
+    }
+
+    return OriginalNtOpenFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, ShareAccess, OpenOptions);
+}
 
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass, PVOID KeyValueInformation, ULONG Length, PULONG ResultLength)
 {
@@ -40,22 +47,8 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
     return status;
 }
 
-NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions)
-{
-    if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 1)
-    {
-        std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
-        // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"Windows\\ShellComponents") != std::wstring::npos) // no delete dir
-            return STATUS_ACCESS_DENIED;
-    }
-
-    return OriginalNtOpenFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, ShareAccess, OpenOptions);
-}
-
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 {
-    OutputDebugStringA("in ntterminate");
     if (GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
         return OriginalNtTerminateProcess(hProcess, code);
 
@@ -91,41 +84,4 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
         }
     }
     return status;
-}
-
-bool InstallHook()
-{
-    OutputDebugStringA("installing hooks");
-    if (MH_Initialize() != MH_OK) { return false; }
-
-    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID*>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID*>(&OriginalNtTerminateProcess)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID*>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID*>(&OriginalNtEnumerateValueKey)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID*>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID*>(&OriginalNtQueryValueKey)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID*>(&HookedNtOpenFile), reinterpret_cast<LPVOID*>(&OriginalNtOpenFile)) != MH_OK) { return false; }
-
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return false; }
-
-    return true;
-}
-
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-        if (!IsExplorerProcess() || !InstallHook())
-            return FALSE;
-        OutputDebugStringA("hooks installed.");
-        OutputDebugStringA(std::to_string(GetCurrentProcessId()).c_str());
-        break;
-    case DLL_THREAD_ATTACH:
-        break;
-    case DLL_THREAD_DETACH:
-        break;
-    case DLL_PROCESS_DETACH:
-        MH_DisableHook(MH_ALL_HOOKS);
-        break;
-    }
-    return TRUE;
 }

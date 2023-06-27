@@ -1,12 +1,12 @@
 CC=x86_64-w64-mingw32-g++
 OUTDIR=bin
 CFLAGS=-s -static
-DFLAGS=-shared -Iminhook -Lminhook -lminhook
+DFLAGS=-shared -Iinclude -Iminhook -Lminhook -lminhook
 
 all: clean kingsguard
 
 kingsguard:
-	$(CC) $(wildcard *.cpp) -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
+	$(CC) $(wildcard src/*.cpp) -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
 
 clean:
 	mkdir -p $(OUTDIR)

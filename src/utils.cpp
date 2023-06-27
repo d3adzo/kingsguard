@@ -24,28 +24,28 @@ DWORD GetPPID(DWORD pid)
 
 int GetProcessName(DWORD pid, char* fname, DWORD sz)
 {
-    HANDLE h = NULL;
-    int e = 0;
-    h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-    if (h)
+    HANDLE hProcess = NULL;
+    int errorCode = 0;
+    hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (hProcess)
     {
-        GetProcessImageFileName(h, fname, sz);
-        CloseHandle(h);
+        GetProcessImageFileName(hProcess, fname, sz);
+        CloseHandle(hProcess);
     }
     else
     {
-        e = GetLastError();
+        errorCode = GetLastError();
     }
-    return (e);
+    return errorCode;
 }
 
 bool IsExplorerProcess(void)
 {
     DWORD pid, ppid;
-    int e;
+    int errorCode;
     char fname[MAX_PATH] = { 0 };
     pid = GetCurrentProcessId();
-    std::string name;
+    std::string processName;
 
     do
     {
@@ -54,10 +54,10 @@ bool IsExplorerProcess(void)
 
         if (!GetProcessName(pid, fname, MAX_PATH))
         {
-            name = std::string(fname);
+            processName = std::string(fname);
             pid = GetPPID(pid);
         }
-    } while (name.find("explorer") == std::string::npos);
+    } while (processName.find("explorer") == std::string::npos);
 
     return true;
 }
