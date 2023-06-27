@@ -1,6 +1,6 @@
 #include "kingsguard.h"
 
-DWORD getParentPID(DWORD pid)
+DWORD GetPPID(DWORD pid)
 {
     HANDLE h = NULL;
     PROCESSENTRY32 pe = { 0 };
@@ -22,7 +22,7 @@ DWORD getParentPID(DWORD pid)
     return (ppid);
 }
 
-int getProcessName(DWORD pid, char* fname, DWORD sz)
+int GetProcessName(DWORD pid, char* fname, DWORD sz)
 {
     HANDLE h = NULL;
     int e = 0;
@@ -39,28 +39,27 @@ int getProcessName(DWORD pid, char* fname, DWORD sz)
     return (e);
 }
 
-bool ExplorerChild(void)
+bool IsExplorerProcess(void)
 {
     DWORD pid, ppid;
     int e;
     char fname[MAX_PATH] = { 0 };
     pid = GetCurrentProcessId();
     std::string name;
-    bool ret = true;
 
     do
     {
         if (pid == 0)
-        {
-            ret = false;
-            break;
-        }
-        e = getProcessName(pid, fname, MAX_PATH);
-        name = std::string(fname);
-        pid = getParentPID(pid);
-    } while (name.find("explorer") == std::string::npos); 
+            return false;
 
-    return ret;
+        if (!GetProcessName(pid, fname, MAX_PATH))
+        {
+            name = std::string(fname);
+            pid = GetPPID(pid);
+        }
+    } while (name.find("explorer") == std::string::npos);
+
+    return true;
 }
 
 PWCHAR KeyValueInformationGetName(LPVOID keyValueInformation, NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass)

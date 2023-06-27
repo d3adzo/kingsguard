@@ -95,7 +95,7 @@ typedef NTSTATUS(WINAPI* pNtOpenFile)(
     ULONG ShareAccess,
     ULONG OpenOptions);
 
-DWORD getParentPID(DWORD);
-int getProcessName(DWORD, char*, DWORD);
-bool ExplorerChild(void);
+DWORD GetPPID(DWORD);
+int GetProcessName(DWORD, char*, DWORD);
+bool IsExplorerProcess(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
