@@ -6,7 +6,7 @@ DFLAGS=-shared -Iminhook -Lminhook -lminhook
 all: clean kingsguard
 
 kingsguard:
-	$(CC) start.cpp -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
+	$(CC) $(wildcard *.cpp) -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
 
 clean:
 	mkdir -p $(OUTDIR)

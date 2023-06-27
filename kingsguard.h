@@ -1,3 +1,5 @@
+#pragma once
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winternl.h>
@@ -59,7 +61,7 @@ typedef struct _NT_KEY_VALUE_FULL_INFORMATION
     WCHAR Name[1];
 } NT_KEY_VALUE_FULL_INFORMATION, *PNT_KEY_VALUE_FULL_INFORMATION;
 
-typedef NTSTATUS(WINAPI *PNT_QUERY_SYSTEM_INFORMATION)(
+typedef NTSTATUS(WINAPI *pNtQuerySystemInformation)(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
     PVOID SystemInformation,
     ULONG SystemInformationLength,
@@ -93,8 +95,7 @@ typedef NTSTATUS(WINAPI *pNtOpenFile)(
     ULONG ShareAccess,
     ULONG OpenOptions);
 
-PNT_QUERY_SYSTEM_INFORMATION OriginalNtQuerySystemInformation = nullptr;
-pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
-pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
-pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
-pNtOpenFile OriginalNtOpenFile = nullptr;
+DWORD getParentPID(DWORD);
+int getProcessName(DWORD, char *, DWORD);
+bool ExplorerChild(void);
+PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
