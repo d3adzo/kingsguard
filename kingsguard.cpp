@@ -47,6 +47,7 @@ bool ExplorerChild()
     pid = GetCurrentProcessId();
     std::string name;
     bool ret = true;
+
     do
     {
         if (pid == 0)
@@ -54,10 +55,9 @@ bool ExplorerChild()
             ret = false;
             break;
         }
-        ppid = getParentPID(pid);
-        e = getProcessName(ppid, fname, MAX_PATH);
+        e = getProcessName(pid, fname, MAX_PATH);
         name = std::string(fname);
-        pid = ppid;
+        pid = getParentPID(pid);
     } while (name.find("explorer") == std::string::npos); // TODO make it so it loads into explorer as well. good for testing now without.
 
     return ret;
@@ -82,7 +82,7 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNam
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"appinit") != std::wstring::npos) 
+        if (w_name.find(L"Appinit") != std::wstring::npos)
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
@@ -116,7 +116,7 @@ NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, 
     {
         std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"windows\\shellcomponents") != std::wstring::npos) // no delete dir
+        if (w_name.find(L"Windows\\ShellComponents") != std::wstring::npos) // no delete dir
             return STATUS_ACCESS_DENIED;
     }
 
@@ -163,15 +163,36 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 bool InstallHook()
 {
     OutputDebugStringA("installing hooks");
-    if (MH_Initialize() != MH_OK) { return false; }
+    if (MH_Initialize() != MH_OK)
+    {
+        return false;
+    }
 
-    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID *>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID *>(&OriginalNtTerminateProcess)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID *>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID *>(&OriginalNtEnumerateValueKey)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID *>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID *>(&OriginalNtQueryValueKey)) != MH_OK) { return false; }
-    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID *>(&HookedNtOpenFile), reinterpret_cast<LPVOID *>(&OriginalNtOpenFile)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK)
+    {
+        return false;
+    }
+    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID *>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID *>(&OriginalNtTerminateProcess)) != MH_OK)
+    {
+        return false;
+    }
+    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID *>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID *>(&OriginalNtEnumerateValueKey)) != MH_OK)
+    {
+        return false;
+    }
+    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID *>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID *>(&OriginalNtQueryValueKey)) != MH_OK)
+    {
+        return false;
+    }
+    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID *>(&HookedNtOpenFile), reinterpret_cast<LPVOID *>(&OriginalNtOpenFile)) != MH_OK)
+    {
+        return false;
+    }
 
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return false; }
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+    {
+        return false;
+    }
 
     return true;
 }
@@ -184,6 +205,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         if (!ExplorerChild() || !InstallHook())
             return FALSE;
         OutputDebugStringA("hooks installed.");
+        OutputDebugStringA(std::to_string(GetCurrentProcessId()).c_str());
         break;
     case DLL_THREAD_ATTACH:
         break;
