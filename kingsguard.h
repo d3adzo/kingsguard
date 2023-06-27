@@ -5,6 +5,7 @@
 #include <tlhelp32.h>
 #include <Psapi.h>
 #include <string>
+#include <cwctype>
 #include "MinHook.h"
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
@@ -58,14 +59,6 @@ typedef struct _NT_KEY_VALUE_FULL_INFORMATION
     WCHAR Name[1];
 } NT_KEY_VALUE_FULL_INFORMATION, *PNT_KEY_VALUE_FULL_INFORMATION;
 
-// typedef struct _NT_KEY_BASIC_INFORMATION
-// {
-// 	LARGE_INTEGER LastWriteTime;
-// 	ULONG TitleIndex;
-// 	ULONG NameLength;
-// 	WCHAR Name[1];
-// } NT_KEY_BASIC_INFORMATION, *PNT_KEY_BASIC_INFORMATION;
-
 typedef NTSTATUS(WINAPI *PNT_QUERY_SYSTEM_INFORMATION)(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
     PVOID SystemInformation,
@@ -75,14 +68,6 @@ typedef NTSTATUS(WINAPI *PNT_QUERY_SYSTEM_INFORMATION)(
 typedef NTSTATUS(WINAPI *pNtTerminateProcess)(
     HANDLE hProcess,
     UINT code);
-
-// typedef NTSTATUS(WINAPI *pNtEnumerateKey)(
-//     HANDLE key,
-//     ULONG index,
-//     NT_KEY_INFORMATION_CLASS keyInformationClass,
-//     LPVOID keyInformation,
-//     ULONG keyInformationLength,
-//     PULONG resultLength);
 
 typedef NTSTATUS(WINAPI *pNtEnumerateValueKey)(
     HANDLE key,
@@ -100,14 +85,16 @@ typedef NTSTATUS(WINAPI *pNtQueryValueKey)(
     ULONG Length,
     PULONG ResultLength);
 
-// typedef NTSTATUS(WINAPI *pNtOpenProcess)(
-//     PHANDLE ProcessHandle,
-//     ACCESS_MASK DesiredAccess,
-//     POBJECT_ATTRIBUTES ObjectAttributes,
-//     PCLIENT_ID ClientId);
+typedef NTSTATUS(WINAPI *pNtOpenFile)(
+    PHANDLE FileHandle,
+    ACCESS_MASK DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
+    PIO_STATUS_BLOCK IoStatusBlock,
+    ULONG ShareAccess,
+    ULONG OpenOptions);
 
 PNT_QUERY_SYSTEM_INFORMATION OriginalNtQuerySystemInformation = nullptr;
 pNtTerminateProcess OriginalNtTerminateProcess = nullptr;
 pNtEnumerateValueKey OriginalNtEnumerateValueKey = nullptr;
 pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
-// pNtOpenProcess OriginalNtOpenProcess = nullptr;
+pNtOpenFile OriginalNtOpenFile = nullptr;
