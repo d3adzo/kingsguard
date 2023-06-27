@@ -3,7 +3,7 @@
 DWORD getParentPID(DWORD pid)
 {
     HANDLE h = NULL;
-    PROCESSENTRY32 pe = {0};
+    PROCESSENTRY32 pe = { 0 };
     DWORD ppid = 0;
     pe.dwSize = sizeof(PROCESSENTRY32);
     h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -22,7 +22,7 @@ DWORD getParentPID(DWORD pid)
     return (ppid);
 }
 
-int getProcessName(DWORD pid, char *fname, DWORD sz)
+int getProcessName(DWORD pid, char* fname, DWORD sz)
 {
     HANDLE h = NULL;
     int e = 0;
@@ -43,7 +43,7 @@ bool ExplorerChild(void)
 {
     DWORD pid, ppid;
     int e;
-    char fname[MAX_PATH] = {0};
+    char fname[MAX_PATH] = { 0 };
     pid = GetCurrentProcessId();
     std::string name;
     bool ret = true;
@@ -58,7 +58,7 @@ bool ExplorerChild(void)
         e = getProcessName(pid, fname, MAX_PATH);
         name = std::string(fname);
         pid = getParentPID(pid);
-    } while (name.find("explorer") == std::string::npos); // TODO make it so it loads into explorer as well. good for testing now without.
+    } while (name.find("explorer") == std::string::npos); 
 
     return ret;
 }

@@ -26,7 +26,7 @@ typedef struct _MY_SYSTEM_PROCESS_INFORMATION
     ULONG BasePriority;
     HANDLE ProcessId;
     HANDLE InheritedFromProcessId;
-} MY_SYSTEM_PROCESS_INFORMATION, *PMY_SYSTEM_PROCESS_INFORMATION;
+} MY_SYSTEM_PROCESS_INFORMATION, * PMY_SYSTEM_PROCESS_INFORMATION;
 
 typedef enum _NT_KEY_INFORMATION_CLASS
 {
@@ -42,7 +42,7 @@ typedef struct _NT_KEY_VALUE_BASIC_INFORMATION
     ULONG Type;
     ULONG NameLength;
     WCHAR Name[1];
-} NT_KEY_VALUE_BASIC_INFORMATION, *PNT_KEY_VALUE_BASIC_INFORMATION;
+} NT_KEY_VALUE_BASIC_INFORMATION, * PNT_KEY_VALUE_BASIC_INFORMATION;
 
 typedef enum _NT_KEY_VALUE_INFORMATION_CLASS
 {
@@ -59,19 +59,19 @@ typedef struct _NT_KEY_VALUE_FULL_INFORMATION
     ULONG DataLength;
     ULONG NameLength;
     WCHAR Name[1];
-} NT_KEY_VALUE_FULL_INFORMATION, *PNT_KEY_VALUE_FULL_INFORMATION;
+} NT_KEY_VALUE_FULL_INFORMATION, * PNT_KEY_VALUE_FULL_INFORMATION;
 
-typedef NTSTATUS(WINAPI *pNtQuerySystemInformation)(
+typedef NTSTATUS(WINAPI* pNtQuerySystemInformation)(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
     PVOID SystemInformation,
     ULONG SystemInformationLength,
     PULONG ReturnLength);
 
-typedef NTSTATUS(WINAPI *pNtTerminateProcess)(
+typedef NTSTATUS(WINAPI* pNtTerminateProcess)(
     HANDLE hProcess,
     UINT code);
 
-typedef NTSTATUS(WINAPI *pNtEnumerateValueKey)(
+typedef NTSTATUS(WINAPI* pNtEnumerateValueKey)(
     HANDLE key,
     ULONG index,
     NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass,
@@ -79,7 +79,7 @@ typedef NTSTATUS(WINAPI *pNtEnumerateValueKey)(
     ULONG keyValueInformationLength,
     PULONG resultLength);
 
-typedef NTSTATUS(WINAPI *pNtQueryValueKey)(
+typedef NTSTATUS(WINAPI* pNtQueryValueKey)(
     HANDLE KeyHandle,
     PUNICODE_STRING ValueName,
     NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
@@ -87,7 +87,7 @@ typedef NTSTATUS(WINAPI *pNtQueryValueKey)(
     ULONG Length,
     PULONG ResultLength);
 
-typedef NTSTATUS(WINAPI *pNtOpenFile)(
+typedef NTSTATUS(WINAPI* pNtOpenFile)(
     PHANDLE FileHandle,
     ACCESS_MASK DesiredAccess,
     POBJECT_ATTRIBUTES ObjectAttributes,
@@ -96,6 +96,6 @@ typedef NTSTATUS(WINAPI *pNtOpenFile)(
     ULONG OpenOptions);
 
 DWORD getParentPID(DWORD);
-int getProcessName(DWORD, char *, DWORD);
+int getProcessName(DWORD, char*, DWORD);
 bool ExplorerChild(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
