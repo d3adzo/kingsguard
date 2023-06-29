@@ -7,6 +7,7 @@ pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
 pNtOpenFile OriginalNtOpenFile = nullptr;
 // pNtSetValueKey OriginalNtSetValueKey = nullptr;
 pNtDeleteValueKey OriginalNtDeleteValueKey = nullptr;
+pNtOpenProcess OriginalNtOpenProcess = nullptr;
 
 bool InstallHook()
 {
@@ -19,6 +20,7 @@ bool InstallHook()
     if (MH_CreateHookApi(L"ntdll", "NtOpenFile", reinterpret_cast<LPVOID*>(&HookedNtOpenFile), reinterpret_cast<LPVOID*>(&OriginalNtOpenFile)) != MH_OK) { return false; }
     // if (MH_CreateHookApi(L"ntdll", "NtSetValueKey", reinterpret_cast<LPVOID*>(&HookedNtSetValueKey), reinterpret_cast<LPVOID*>(&OriginalNtSetValueKey)) != MH_OK) { return false; }
     if (MH_CreateHookApi(L"ntdll", "NtDeleteValueKey", reinterpret_cast<LPVOID*>(&HookedNtDeleteValueKey), reinterpret_cast<LPVOID*>(&OriginalNtDeleteValueKey)) != MH_OK) { return false; }
+    if (MH_CreateHookApi(L"ntdll", "NtOpenProcess", reinterpret_cast<LPVOID*>(&HookedNtOpenProcess), reinterpret_cast<LPVOID*>(&OriginalNtOpenProcess)) != MH_OK) { return false; }
 
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { return false; }
 

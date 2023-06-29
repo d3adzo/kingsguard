@@ -38,7 +38,7 @@ BOOL RemoveDllFromPebW(_In_ LPCWSTR lpModuleName) {
 		Module = (mPLDR_MODULE)((PBYTE)Next - 16);
 		if (Module->BaseDllName.Buffer != NULL)
 		{
-			if (CheckExists(std::wstring(Module->BaseDllName.Buffer), lpModuleName, false))
+			if (CheckExistsW(std::wstring(Module->BaseDllName.Buffer), lpModuleName, false))
 			{
 				RemoveEntryList(&Module->InLoadOrderModuleList);
 				RemoveEntryList(&Module->InInitializationOrderModuleList);

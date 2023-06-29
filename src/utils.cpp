@@ -68,10 +68,23 @@ bool IsExplorerProcess(void)
     return true;
 }
 
-bool CheckExists(std::wstring str, std::wstring value, bool enumerate)
+bool CheckExistsA(std::string str, std::string value, bool enumerate)
 {
     bool ret = false;
+    std::transform(str.begin(), str.end(), str.begin(), tolower);
 
+    if (str.find(value) != std::string::npos)
+        ret = true;
+
+    if (enumerate)
+        ret = !ret;
+
+    return ret;
+}
+
+bool CheckExistsW(std::wstring str, std::wstring value, bool enumerate)
+{
+    bool ret = false;
     std::transform(str.begin(), str.end(), str.begin(), towlower);
 
     if (str.find(value) != std::wstring::npos)
@@ -81,7 +94,6 @@ bool CheckExists(std::wstring str, std::wstring value, bool enumerate)
         ret = !ret;
 
     return ret;
-
 }
 
 PWCHAR KeyValueInformationGetName(LPVOID keyValueInformation, NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass)
