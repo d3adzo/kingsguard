@@ -1,7 +1,7 @@
 
 ```
 
-			 />
+             />
             /<
            /<
  |\_______{o}----------------------------------------------------------_
@@ -23,6 +23,7 @@ The hooking library being used in MinHook.
 Kingsguard hooks the following functions for the purposes of evasion and protection:
 - `NtOpenFile`
 - `NtOpenProcess`
+- `NtQuerySystemInformation`
 - `NtTerminateProcess`
 - `NtEnumerateValueKey`
 - `NtQueryValueKey`
@@ -44,12 +45,11 @@ Options are set within `include/config.h`.
 An install script is provided. It needs more testing and should be refined, but it works for now.
 
 ## Limitations 
-One note on the explorer.exe loading. This is a limitation that can be easily bypassed by running under a service process or by killing explorer and restarting it. System integrity is more important to me.
+One note on the explorer.exe loading. This is a limitation that can be easily bypassed by running under a service process. System integrity is more important to me.
 
 Also, the hooks are not all encompassing. If a function is called with specific right not accounted for, it will bypass and call the original hook. One example of this is with NtOpenFile. The current function looks only for `DELETE` in the DesiredAccess mask, but there are other flags that can be used to delete a file like `FILE_SHARE_DELETE_ON_CLOSE`.
 
 Lastly, all processes seem to load via AppInit except reg.exe. I recommend pairing this with `regprotect.ps1` as a support object.
 
 ## TODO
-- More testing on the PEB modification stability. 
 - Having a hook instead of just modifying the PEB to remove the kingsguard dll. Procexp is still able to see the loaded DLL as of this moment.
