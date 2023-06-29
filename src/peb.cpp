@@ -32,17 +32,14 @@ BOOL RemoveDllFromPebW(_In_ LPCWSTR lpModuleName) {
 	PLIST_ENTRY Head = &Peb->LoaderData->InMemoryOrderModuleList;
 	PLIST_ENTRY Next = Head->Flink;
 	Module = (mPLDR_MODULE)((PBYTE)Next - 16);
-    OutputDebugStringA("iterating thru peb");
 
 	while (Next != Head)
 	{
 		Module = (mPLDR_MODULE)((PBYTE)Next - 16);
 		if (Module->BaseDllName.Buffer != NULL)
 		{
-            OutputDebugStringW(Module->BaseDllName.Buffer);
 			if (CheckExists(std::wstring(Module->BaseDllName.Buffer), lpModuleName, false))
 			{
-                OutputDebugStringA("found and removed from peb");
 				RemoveEntryList(&Module->InLoadOrderModuleList);
 				RemoveEntryList(&Module->InInitializationOrderModuleList);
 				RemoveEntryList(&Module->InMemoryOrderModuleList);

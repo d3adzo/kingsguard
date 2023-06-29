@@ -28,7 +28,6 @@ NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, 
 {
     if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 3)
     {
-        OutputDebugStringW(ObjectAttributes->ObjectName->Buffer);
         if (CheckExists(std::wstring(ObjectAttributes->ObjectName->Buffer), PATH, false))
             return STATUS_ACCESS_DENIED;
     }
