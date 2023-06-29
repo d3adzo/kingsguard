@@ -1,7 +1,7 @@
 CC=x86_64-w64-mingw32-g++
 OUTDIR=bin
-CFLAGS=-s -static
-DFLAGS=-shared -Iinclude -Iminhook -Lminhook -lminhook
+CFLAGS=-s -static -Iinclude
+DFLAGS=-shared -Iminhook -Lminhook -lminhook
 
 all: clean kingsguard
 

