@@ -12,17 +12,17 @@ NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNa
     return OriginalNtDeleteValueKey(KeyHandle, ValueName);
 }
 
-// NTSTATUS WINAPI HookedNtSetValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, ULONG TitleIndex, ULONG Type, PVOID Data, ULONG DataSize)
-// {
-//     if (ValueName->Length > 3)
-//     {
-//         std::wstring w_name = std::wstring(ValueName->Buffer);
-//         if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false)) 
-//             return STATUS_ACCESS_DENIED;
-//     }
+NTSTATUS WINAPI HookedNtSetValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, ULONG TitleIndex, ULONG Type, PVOID Data, ULONG DataSize)
+{
+    if (ValueName->Length > 3)
+    {
+        std::wstring w_name = std::wstring(ValueName->Buffer);
+        if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false)) 
+            return STATUS_ACCESS_DENIED;
+    }
 
-//     return OriginalNtSetValueKey(KeyHandle, ValueName, TitleIndex, Type, Data, DataSize);
-// }
+    return OriginalNtSetValueKey(KeyHandle, ValueName, TitleIndex, Type, Data, DataSize);
+}
 
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName, NT_KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass, PVOID KeyValueInformation, ULONG Length, PULONG ResultLength)
 {

@@ -6,7 +6,7 @@ mPPEB GetPeb(VOID)
 {
 #if defined(_WIN64)
 	return (mPPEB)__readgsqword(0x60);
-#elif define(_WIN32)
+#else
 	return (mPPEB)__readfsdword(0x30);
 #endif
 }
@@ -25,7 +25,8 @@ VOID RemoveEntryList(LIST_ENTRY* Entry)
 	}
 }
 
-BOOL RemoveDllFromPebW(_In_ LPCWSTR lpModuleName) {
+BOOL RemoveDllFromPebW(LPCWSTR lpModuleName) 
+{
 	mPPEB Peb = GetPeb();
 	mPLDR_MODULE Module = NULL;
 

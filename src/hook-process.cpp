@@ -1,10 +1,28 @@
 #include "kingsguard.h"
 
+// NTSTATUS WINAPI HookedNtQueryInformationProcess(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength)
+// {
+//     NTSTATUS status = OriginalNtQueryInformationProcess(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength, ReturnLength);
+//     if (status == STATUS_SUCCESS && ProcessInformationClass == ProcessBasicInformation)
+//     {
+//         PROCESS_BASIC_INFORMATION* information = (PROCESS_BASIC_INFORMATION*)ProcessInformation;
+//         mPEB peb;
+//         if (!ReadProcessMemory(GetCurrentProcess(), information->PebBaseAddress, (LPVOID)&peb, sizeof(mPPEB), NULL))
+//             return status;
+//         if ((DWORD)&peb < 1000)
+//             return status;
+//         RemoveDllFromPebW((mPPEB)&peb, DLL);
+//         OutputDebugStringA("out");
+//     }
+
+//     return status;
+// }
+
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId)
 {
     if (DesiredAccess & PROCESS_TERMINATE)
     {
-        char name[MAX_PATH] = {0};
+        char name[MAX_PATH] = { 0 };
         if (!GetProcessName((DWORD)ClientId->UniqueProcess, name, MAX_PATH))
         {
             if (CheckExistsA(std::string(name), PROCESSA, false))

