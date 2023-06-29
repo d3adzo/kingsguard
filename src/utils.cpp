@@ -55,7 +55,8 @@ bool IsExplorerProcess(void)
         if (!GetProcessName(pid, fname, MAX_PATH))
         {
             processName = std::string(fname);
-            // OutputDebugStringA(processName.c_str());
+            if (processName.find("svchost") != std::string::npos) // efficiency is key here
+                return false;
 
             pid = GetPPID(pid);
         }
