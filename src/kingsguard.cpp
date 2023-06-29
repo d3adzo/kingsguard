@@ -10,7 +10,6 @@ pNtDeleteValueKey OriginalNtDeleteValueKey = nullptr;
 
 bool InstallHook()
 {
-    OutputDebugStringA("installing hooks");
     if (MH_Initialize() != MH_OK) { return false; }
 
     if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
@@ -33,8 +32,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     case DLL_PROCESS_ATTACH:
         if (!IsExplorerProcess() || !InstallHook())
             return FALSE;
-        OutputDebugStringA("hooks installed.");
-        OutputDebugStringA(std::to_string(GetCurrentProcessId()).c_str());
+
+        // RemoveDllFromPebW(DLL);
+
         break;
     case DLL_THREAD_ATTACH:
         break;

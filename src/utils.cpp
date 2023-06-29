@@ -55,7 +55,13 @@ bool IsExplorerProcess(void)
         if (!GetProcessName(pid, fname, MAX_PATH))
         {
             processName = std::string(fname);
+            // OutputDebugStringA(processName.c_str());
+
             pid = GetPPID(pid);
+        }
+        else
+        {
+            return false;
         }
     } while (processName.find("explorer") == std::string::npos);
 
@@ -67,7 +73,6 @@ bool CheckExists(std::wstring str, std::wstring value, bool enumerate)
     bool ret = false;
 
     std::transform(str.begin(), str.end(), str.begin(), towlower);
-    std::transform(value.begin(), value.end(), value.begin(), towlower);
 
     if (str.find(value) != std::wstring::npos)
         ret = true;

@@ -10,6 +10,7 @@
 #include <string>
 #include <cwctype>
 #include "MinHook.h"
+#include "pebstruct.h"
 
 #include "config.h"
 
@@ -109,6 +110,10 @@ typedef NTSTATUS(WINAPI* pNtSetValueKey)(
 typedef NTSTATUS(WINAPI* pNtDeleteValueKey)(
   HANDLE KeyHandle,
   PUNICODE_STRING ValueName);
+
+mPPEB GetPeb(VOID);
+VOID RemoveEntryList(LIST_ENTRY*);
+BOOL RemoveDllFromPebW(LPCWSTR); 
 
 DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
