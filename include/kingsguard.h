@@ -11,6 +11,7 @@
 #include <cwctype>
 #include "MinHook.h"
 #include "pebstruct.h"
+#include "obfuscate.h"
 
 #include "config.h"
 
@@ -117,12 +118,12 @@ typedef NTSTATUS(WINAPI* pNtOpenProcess)(
     POBJECT_ATTRIBUTES ObjectAttributes,
     PCLIENT_ID ClientId);
 
-typedef NTSTATUS(WINAPI* pNtQueryInformationProcess)(
-    HANDLE ProcessHandle,
-    PROCESSINFOCLASS ProcessInformationClass,
-    PVOID ProcessInformation,
-    ULONG ProcessInformationLength,
-    PULONG ReturnLength);
+// typedef NTSTATUS(WINAPI* pNtQueryInformationProcess)(
+//     HANDLE ProcessHandle,
+//     PROCESSINFOCLASS ProcessInformationClass,
+//     PVOID ProcessInformation,
+//     ULONG ProcessInformationLength,
+//     PULONG ReturnLength);
 
 mPPEB GetPeb(VOID);
 VOID RemoveEntryList(LIST_ENTRY*);

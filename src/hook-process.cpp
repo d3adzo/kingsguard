@@ -34,7 +34,7 @@ NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAc
 
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 {
-    if (GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
+    if (!NOTERM || GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
         return OriginalNtTerminateProcess(hProcess, code);
 
     return 1;

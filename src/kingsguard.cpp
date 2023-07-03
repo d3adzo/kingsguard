@@ -8,7 +8,7 @@ pNtQueryValueKey OriginalNtQueryValueKey = nullptr;
 pNtDeleteValueKey OriginalNtDeleteValueKey = nullptr;
 pNtSetValueKey OriginalNtSetValueKey = nullptr;
 pNtOpenFile OriginalNtOpenFile = nullptr;
-pNtQueryInformationProcess OriginalNtQueryInformationProcess = nullptr;
+// pNtQueryInformationProcess OriginalNtQueryInformationProcess = nullptr;
 
 bool InstallHook()
 {

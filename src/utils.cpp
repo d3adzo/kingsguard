@@ -41,8 +41,7 @@ int GetProcessName(DWORD pid, char* fname, DWORD sz)
 
 bool IsExplorerProcess(void)
 {
-    DWORD pid, ppid;
-    int errorCode;
+    DWORD pid;
     char fname[MAX_PATH] = { 0 };
     pid = GetCurrentProcessId();
     std::string processName;
@@ -55,7 +54,7 @@ bool IsExplorerProcess(void)
         if (!GetProcessName(pid, fname, MAX_PATH))
         {
             processName = std::string(fname);
-            if (processName.find("svchost") != std::string::npos) // efficiency is key here
+            if (processName.find(AY_OBFUSCATE("svchost")) != std::string::npos) // efficiency is key here
                 return false;
 
             pid = GetPPID(pid);
@@ -64,7 +63,7 @@ bool IsExplorerProcess(void)
         {
             return false;
         }
-    } while (processName.find("explorer") == std::string::npos);
+    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos);
 
     return true;
 }

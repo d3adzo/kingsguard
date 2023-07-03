@@ -1,9 +1,9 @@
 CC=x86_64-w64-mingw32-g++
 CP=i686-w64-mingw32-g++
 OUTDIR=bin
-CFLAGS=-shared -s -static -Iinclude -fpermissive
-DFLAGS32=-Iminhook32 -Lminhook32 -lminhook
-DFLAGS64=-Iminhook -Lminhook -lminhook
+CFLAGS=-shared -s -static -Iinclude -fpermissive -O3 
+DFLAGS32=-Lminhook32 -lminhook
+DFLAGS64=-Lminhook -lminhook
 
 all: clean 64kingsguard 32kingsguard
 
