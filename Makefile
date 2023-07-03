@@ -1,18 +1,16 @@
-CC=x86_64-w64-mingw32-g++
-CP=i686-w64-mingw32-g++
-OUTDIR=bin
-CFLAGS=-shared -s -static -Iinclude -fpermissive -O3 
-DFLAGS32=-Lminhook32 -lminhook
-DFLAGS64=-Lminhook -lminhook
+CXX := x86_64-w64-mingw32-g++
+SRC_DIR := src
+OBJ_DIR := obj
+SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
+LDFLAGS := -Lminhook -lminhook -shared -s -static 
+CXXFLAGS := -Iinclude -fpermissive 
 
-all: clean 64kingsguard 32kingsguard
+kingsguard.dll: $(OBJ_FILES)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
-32kingsguard:
-	$(CP) $(wildcard src/*.cpp) -o $(OUTDIR)/kingsguard32.dll $(DFLAGS32) $(CFLAGS)
-
-64kingsguard:
-	$(CC) $(wildcard src/*.cpp) -o $(OUTDIR)/kingsguard.dll $(DFLAGS64) $(CFLAGS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS) 
 
 clean:
-	mkdir -p $(OUTDIR)
-	rm -f $(OUTDIR)/*
+	rm -f $(OBJ_DIR)/*.o

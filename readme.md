@@ -31,7 +31,7 @@ Kingsguard hooks the following functions for the purposes of evasion and protect
 - `NtDeleteValueKey`
 
 ## Building / Usage
-The project can be built with MinGW. Run `make` and find the compiled DLL in `bin/kingsguard.dll`.
+The project can be built with MinGW. Run `make` and find the compiled DLL as `kingsguard.dll`.
 
 Options are set within `include/config.h`. 
 - `DLL` -> DLL name to remove from PEB
