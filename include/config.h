@@ -6,5 +6,9 @@
 #define KEY L"ksguard" // Reg value to hide / protect
 #define PATH L"windows\\shellcomponents" // path + subdirectories to lock
 
-#define TAUNT false // if true, overwrite process list with 'kingsguard'
+#define TAUNT false // if true, overwrite process list with TAUNTVALUE
 #define NOTERM true // if true, NtTerminate hook prevents killing other processes
+
+#if TAUNT
+#define TAUNTVALUE L"kingsguard" // overwrite all process names 
+#endif
