@@ -21,20 +21,21 @@ In order to prevent loader lock and not slow the system down to a crawl, a PPID 
 The hooking library being used in MinHook. 
 ## Hooks
 Kingsguard hooks the following functions for the purposes of evasion and protection:
-- `NtOpenFile`
-- `NtOpenProcess`
 - `NtQuerySystemInformation`
+- `NtOpenProcess`
 - `NtTerminateProcess`
 - `NtEnumerateValueKey`
 - `NtQueryValueKey`
 - `NtSetValueKey`
 - `NtDeleteValueKey`
+- `NtOpenFile`
+- `NtQueryDirectoryFile`
 
 ## Building / Usage
-The project can be built with MinGW. Run `make` and find the compiled DLL as `kingsguard.dll`.
+The project can be built with MinGW. Run `make` and find the compiled DLL as `kingsguard.dll`. Run `make 32bit` for a 32-bit version.
 
 Options are set within `include/config.h`. 
-- `DLL` -> DLL name to remove from PEB
+- `DLL` -> DLL name to hide / remove from PEB
 - `PROCESSA/W` -> Process name to hide / protect
 - `KEY` -> Registry value name to hide / protect
 - `PATH` -> File system path to protect

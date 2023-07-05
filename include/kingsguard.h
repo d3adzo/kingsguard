@@ -118,6 +118,19 @@ typedef NTSTATUS(WINAPI* pNtOpenProcess)(
     POBJECT_ATTRIBUTES ObjectAttributes,
     PCLIENT_ID ClientId);
 
+typedef NTSTATUS(WINAPI* pNtQueryDirectoryFile)(
+    HANDLE FileHandle,
+    HANDLE Event,
+    PIO_APC_ROUTINE ApcRoutine,
+    PVOID ApcContext,
+    PIO_STATUS_BLOCK IoStatusBlock,
+    PVOID FileInformation,
+    ULONG Length,
+    FILE_INFORMATION_CLASS FileInformationClass,
+    BOOLEAN ReturnSingleEntry,
+    PUNICODE_STRING FileName,
+    BOOLEAN RestartScan);
+
 // typedef NTSTATUS(WINAPI* pNtQueryInformationProcess)(
 //     HANDLE ProcessHandle,
 //     PROCESSINFOCLASS ProcessInformationClass,
@@ -144,6 +157,7 @@ NTSTATUS WINAPI HookedNtOpenFile(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_S
 NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID, ULONG);
 NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE, PUNICODE_STRING);
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID);
+NTSTATUS WINAPI HookedNtQueryDirectoryFile(HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS, BOOLEAN, PUNICODE_STRING, BOOLEAN);
 // NTSTATUS WINAPI HookedNtQueryInformationProcess(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
 
 extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
@@ -154,4 +168,5 @@ extern pNtOpenFile OriginalNtOpenFile;
 extern pNtSetValueKey OriginalNtSetValueKey;
 extern pNtDeleteValueKey OriginalNtDeleteValueKey;
 extern pNtOpenProcess OriginalNtOpenProcess;
+extern pNtQueryDirectoryFile OriginalNtQueryDirectoryFile;
 // extern pNtQueryInformationProcess OriginalNtQueryInformationProcess;
