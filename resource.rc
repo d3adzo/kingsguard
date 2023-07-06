@@ -1,0 +1,2 @@
+#include "resource.h"
+IDR_MENU1 info "kingsguard.bin"
