@@ -142,9 +142,9 @@ mPPEB GetPeb(VOID);
 VOID RemoveEntryList(LIST_ENTRY*);
 BOOL RemoveDllFromPebW(LPCWSTR);
 
-DWORD GetPPID(DWORD);
+// DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
-bool IsExplorerProcess(void);
+// bool IsExplorerProcess(void);
 PWCHAR KeyValueInformationGetName(LPVOID, NT_KEY_VALUE_INFORMATION_CLASS);
 bool CheckExistsA(std::string, std::string, bool);
 bool CheckExistsW(std::wstring, std::wstring, bool);

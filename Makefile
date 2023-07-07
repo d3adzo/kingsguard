@@ -1,27 +1,34 @@
-CXX := x86_64-w64-mingw32-g++
-C32 := i686-w64-mingw32-g++
+32P := i686-w64-mingw32
+64P := x86_64-w64-mingw32
 SRC_DIR := src
 OBJ_DIR := obj
 SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 THR = -Lminhook32
 SIX = -Lminhook
-LDFLAGS := -lminhook -shared -s -static 
+MH := -lminhook
+LDFLAGS := -shared -s -static 
 CXXFLAGS := -Iinclude -fpermissive 
 
-all: kingsguard.dll
+all: loader.dll kingsguard.dll
 
-32bit: clean
-	$(C32) src/*.cpp -o kingsguard32.dll -shared $(THR) $(LDFLAGS) $(CXXFLAGS) 
+resource.o:
+	$(64P)-windres resource.rc -o $(OBJ_DIR)/$@
+
+resource32.o:
+	$(32P)-windres resource.rc -o minhook32/$@
+
+loader.dll:
+	$(64P)-g++ loader/loader.cpp -o $@ $(LDFLAGS) -Iinclude
+
+kingsguard32.dll: resource32.o
+	$(32P)-g++ src/*.cpp minhook32/resource32.o -o $@ -shared $(THR) $(MH) $(LDFLAGS) $(CXXFLAGS) 
 
 kingsguard.dll: $(OBJ_FILES)
-	$(CXX) -o $@ $^ $(SIX) $(LDFLAGS)
-
-kingsguard32.dll: $(OBJ_FILES)
-	$(C32) -o $@ $^ $(THR) $(LDFLAGS)
+	$(64P)-g++ -o $@ $(wildcard $(OBJ_DIR)/*.o) $(SIX) $(MH) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) 
+	$(64P)-g++ -c -o $@ $< $(CXXFLAGS) 
 
 clean:
 	mkdir -p $(OBJ_DIR)

