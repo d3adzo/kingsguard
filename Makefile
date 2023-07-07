@@ -32,4 +32,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 clean:
 	mkdir -p $(OBJ_DIR)
-	rm -f $(OBJ_DIR)/*.o
+	rm -f *.dll

@@ -1,5 +1,4 @@
 bin/*
-obj/*
 .DS_STORE
 .vscode/*
 *.dll

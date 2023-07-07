@@ -1,4 +1,3 @@
-#ifndef LOADER
 #define APPINIT L"appinit"
 
 #define DLL L"kgsgrd" // dll name
@@ -12,9 +11,4 @@
 
 #if TAUNT
 #define TAUNTVALUE L"kingsguard" // overwrite all process names 
-#endif
-
-#else
-#define DLL L"C:\\windows\\system32\\kgsgrd.dll"
-
 #endif
