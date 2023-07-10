@@ -10,7 +10,7 @@ MH := -lminhook
 LDFLAGS := -shared -s -static 
 CXXFLAGS := -Iinclude -fpermissive 
 
-all: loader.dll kingsguard.dll
+all: resource.o kgsgrd.dll kgsgrd32.dll
 
 resource.o:
 	$(64P)-windres resource.rc -o $(OBJ_DIR)/$@
@@ -18,13 +18,10 @@ resource.o:
 resource32.o:
 	$(32P)-windres resource.rc -o minhook32/$@
 
-loader.dll:
-	$(64P)-g++ loader/loader.cpp -o $@ $(LDFLAGS) -Iinclude
+kgsgrd32.dll: resource32.o
+	$(32P)-g++ $(SRC_FILES) minhook32/resource32.o -o $@ -shared $(THR) $(MH) $(LDFLAGS) $(CXXFLAGS) 
 
-kingsguard32.dll: resource32.o
-	$(32P)-g++ src/*.cpp minhook32/resource32.o -o $@ -shared $(THR) $(MH) $(LDFLAGS) $(CXXFLAGS) 
-
-kingsguard.dll: $(OBJ_FILES)
+kgsgrd.dll: $(OBJ_FILES)
 	$(64P)-g++ -o $@ $(wildcard $(OBJ_DIR)/*.o) $(SIX) $(MH) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
