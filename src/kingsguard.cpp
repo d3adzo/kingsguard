@@ -39,7 +39,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         if (!IsExplorerProcess() || !InstallHook())
             return FALSE;
 
-        RemoveDllFromPebW(DLL); // kgsgd
+#if defined(_WIN64)
+        RemoveDllFromPebW(DLL); 
+#endif
 
         break;
     case DLL_THREAD_ATTACH:

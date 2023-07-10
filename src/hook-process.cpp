@@ -20,7 +20,7 @@
 
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId)
 {
-    if (DesiredAccess & PROCESS_TERMINATE)
+    if (DesiredAccess & PROCESS_TERMINATE || DesiredAccess & PROCESS_SUSPEND_RESUME)
     {
         char name[MAX_PATH] = { 0 };
         if (!GetProcessName((DWORD)ClientId->UniqueProcess, name, MAX_PATH))

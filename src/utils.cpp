@@ -22,23 +22,6 @@ DWORD GetPPID(DWORD pid)
     return (ppid);
 }
 
-int GetProcessName(DWORD pid, char* fname, DWORD sz)
-{
-    HANDLE hProcess = NULL;
-    int errorCode = 0;
-    hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-    if (hProcess)
-    {
-        GetProcessImageFileName(hProcess, fname, sz);
-        CloseHandle(hProcess);
-    }
-    else
-    {
-        errorCode = GetLastError();
-    }
-    return errorCode;
-}
-
 bool IsExplorerProcess(void)
 {
     DWORD pid;
@@ -63,9 +46,26 @@ bool IsExplorerProcess(void)
         {
             return false;
         }
-    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos);
+    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos && processName.find(AY_OBFUSCATE("powershell")) == std::string::npos);
 
     return true;
+}
+
+int GetProcessName(DWORD pid, char* fname, DWORD sz)
+{
+    HANDLE hProcess = NULL;
+    int errorCode = 0;
+    hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (hProcess)
+    {
+        GetProcessImageFileName(hProcess, fname, sz);
+        CloseHandle(hProcess);
+    }
+    else
+    {
+        errorCode = GetLastError();
+    }
+    return errorCode;
 }
 
 bool CheckExistsA(std::string str, std::string value, bool enumerate)

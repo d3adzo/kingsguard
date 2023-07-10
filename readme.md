@@ -54,7 +54,7 @@ Also, the hooks are not all encompassing. If a function is called with specific 
 
 Another note on the PATH hook - it searches for a substring. For example, if it is set to `C:\Users`, any files at this directory and its respective subdirectories will be locked. Be careful.
 
-Lastly, all processes seem to load via AppInit minus a few crucial ones like reg.exe. I recommend pairing this with `regprotect.ps1` as a support object.
+Lastly, all processes seem to load via AppInit minus a few crucial ones like cmd.exe and reg.exe (this is an expected limitation due to certain processes not loading user32.dll). I recommend pairing this with `regprotect.ps1` as a support object.
 
 ## TODO
 - Having a hook instead of just modifying the PEB to remove the kingsguard dll. Procexp is still able to see the loaded DLL as of this moment.
