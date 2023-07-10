@@ -46,7 +46,7 @@ bool IsExplorerProcess(void)
         {
             return false;
         }
-    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos);
+    } while (processName.find(AY_OBFUSCATE("explorer")) == std::string::npos && processName.find(AY_OBFUSCATE("cmd")) == std::string::npos && processName.find(AY_OBFUSCATE("powershell")) == std::string::npos);
 
     return true;
 }
