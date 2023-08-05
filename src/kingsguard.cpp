@@ -18,9 +18,7 @@ bool InstallHook()
 
     if (MH_CreateHookApi(L"ntdll", "NtQuerySystemInformation", reinterpret_cast<LPVOID*>(&HookedNtQuerySystemInformation), reinterpret_cast<LPVOID*>(&OriginalNtQuerySystemInformation)) != MH_OK) { return false; }
     if (MH_CreateHookApi(L"ntdll", "NtOpenProcess", reinterpret_cast<LPVOID*>(&HookedNtOpenProcess), reinterpret_cast<LPVOID*>(&OriginalNtOpenProcess)) != MH_OK) { return false; }
-#if NOTERM
     if (MH_CreateHookApi(L"ntdll", "NtTerminateProcess", reinterpret_cast<LPVOID*>(&HookedNtTerminateProcess), reinterpret_cast<LPVOID*>(&OriginalNtTerminateProcess)) != MH_OK) { return false; }
-#endif
     if (MH_CreateHookApi(L"ntdll", "NtEnumerateValueKey", reinterpret_cast<LPVOID*>(&HookedNtEnumerateValueKey), reinterpret_cast<LPVOID*>(&OriginalNtEnumerateValueKey)) != MH_OK) { return false; }
     if (MH_CreateHookApi(L"ntdll", "NtQueryValueKey", reinterpret_cast<LPVOID*>(&HookedNtQueryValueKey), reinterpret_cast<LPVOID*>(&OriginalNtQueryValueKey)) != MH_OK) { return false; }
     if (MH_CreateHookApi(L"ntdll", "NtDeleteValueKey", reinterpret_cast<LPVOID*>(&HookedNtDeleteValueKey), reinterpret_cast<LPVOID*>(&OriginalNtDeleteValueKey)) != MH_OK) { return false; }
