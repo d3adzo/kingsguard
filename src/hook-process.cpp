@@ -44,9 +44,9 @@ NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
     if (GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
         return OriginalNtTerminateProcess(hProcess, code);
 
-#if NOTERM
-    return 1;
-#else
+// #if NOTERM
+//    return 1;
+// #else
     char name[MAX_PATH] = { 0 };
 
     if (!GetProcessName(GetProcessId(hProcess), name, MAX_PATH))
@@ -54,7 +54,7 @@ NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
             return STATUS_ACCESS_DENIED;
 
     return OriginalNtTerminateProcess(hProcess, code);
-#endif
+// #endif
 }
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength)
