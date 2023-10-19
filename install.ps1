@@ -12,7 +12,8 @@ Foreach ($i in $arr)
     $acl = Get-Acl $i
     $rule = New-Object System.Security.AccessControl.RegistryAccessRule ("NT AUTHORITY\INTERACTIVE","SetValue","Deny")
     $acl.SetAccessRule($rule)
+    $rule = New-Object System.Security.AccessControl.RegistryAccessRule ("NT AUTHORITY\INTERACTIVE","Delete","Deny")
+    $acl.SetAccessRule($rule)
     echo $acl | format-list
     $acl | Set-Acl -Path $i
-
 }

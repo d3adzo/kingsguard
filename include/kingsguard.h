@@ -10,7 +10,6 @@
 #include <string>
 #include <cwctype>
 #include "MinHook.h"
-#include "pebstruct.h"
 #include "obfuscate.h"
 
 #include "config.h"
@@ -141,10 +140,6 @@ typedef NTSTATUS(WINAPI* pNtQueryDirectoryFile)(
 //     PVOID ProcessInformation,
 //     ULONG ProcessInformationLength,
 //     PULONG ReturnLength);
-
-mPPEB GetPeb(VOID);
-VOID RemoveEntryList(LIST_ENTRY*);
-BOOL RemoveDllFromPebW(LPCWSTR);
 
 DWORD GetPPID(DWORD);
 int GetProcessName(DWORD, char*, DWORD);
