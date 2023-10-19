@@ -18,6 +18,13 @@
 //     return status;
 // }
 
+// NTSTATUS WINAPI HookedRtlDestroyProcessParameters(PRTL_USER_PROCESS_PARAMETERS ProcessParameters)
+// {
+//     OutputDebugStringW(ProcessParameters->ImagePathName.Buffer);
+
+//     return OriginalRtlDestroyProcessParameters(ProcessParameters);
+// }
+
 NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId)
 {
     if (DesiredAccess & PROCESS_TERMINATE || DesiredAccess & PROCESS_SUSPEND_RESUME)
@@ -34,10 +41,20 @@ NTSTATUS WINAPI HookedNtOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAc
 
 NTSTATUS WINAPI HookedNtTerminateProcess(HANDLE hProcess, UINT code)
 {
-    if (!NOTERM || GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
+    if (GetProcessId(GetCurrentProcess()) == GetProcessId(hProcess))
         return OriginalNtTerminateProcess(hProcess, code);
 
-    return 1;
+// #if NOTERM
+//    return 1;
+// #else
+    char name[MAX_PATH] = { 0 };
+
+    if (!GetProcessName(GetProcessId(hProcess), name, MAX_PATH))
+        if (CheckExistsA(std::string(name), PROCESSA, false))
+            return STATUS_ACCESS_DENIED;
+
+    return OriginalNtTerminateProcess(hProcess, code);
+// #endif
 }
 
 NTSTATUS WINAPI HookedNtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength)
