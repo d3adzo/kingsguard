@@ -13,7 +13,7 @@
 
 // #define NOTERM false // if true, NtTerminate hook prevents killing other processes. CURRENTLY BROKEN
 
-#define PATHLOCK true // if true, lock path and subdirectories
+#define PATHLOCK false // if true, lock path and subdirectories
 
 #if PATHLOCK
 #define PATH L"windows\\shellcomponents" // path + subdirectories to lock
